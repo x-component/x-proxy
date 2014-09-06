@@ -1,0 +1,19 @@
+{
+  "name": "x-proxy",
+  "version": "0.0.1",
+  "license": "MIT",
+  "description": "helpers to perfrom url rewriting and reverse rewriting for a proxy target",
+  "keywords": [
+    "x-x",
+    "x-component",
+    "proxy"
+  ],
+  "dependencies": {
+    "x-component/x-common": "*",
+    "x-component/x-log": "*"
+  },
+  "main": "proxy.js",
+  "scripts": [
+    "proxy.js"
+  ]
+}
