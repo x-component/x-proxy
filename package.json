@@ -1,21 +1,21 @@
 {
   "name": "x-proxy",
   "description": "helpers to perfrom url rewriting and reverse rewriting for a proxy target",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": {
     "type": "MIT"
   },
   "dependencies": {
-    "x-common": "~0.0",
-    "x-log": "~0.0"
+    "x-common": "1.x.x",
+    "x-log": "1.x.x"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/x-component/x-proxy.git"
   },
   "devDependencies": {
-    "x-publish": "~0.0",
-    "x-test": "~0.0"
+    "x-publish": "1.x.x",
+    "x-test": "1.x.x"
   },
   "main": "proxy.js",
   "keywords": [
@@ -24,14 +24,9 @@
     "proxy"
   ],
   "scripts": {
-    "prepublish": "./node_modules/x-publish/scripts/prepublish.sh ./proxy.js",
+    "prepublish": "./node_modules/x-publish/scripts/prepublish.sh",
     "test": "./node_modules/x-test/scripts/test.sh ./test"
   },
-  "author": "",
-  "maintainers": [
-    ""
-  ],
-  "contributors": [],
   "bugs": {
     "url": "https://github.com/x-component/x-proxy/issues"
   }
