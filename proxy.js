@@ -98,15 +98,15 @@ module.exports=extend(M=function(req,target_config,mount){
 		
 		protocol      = headers.isssl || headers['x-isssl'] ? 'https' : ( headers['x-forwarded-proto'] || server_config.protocol  || 'http'  ),
 		
-		host          = (tmp=headers['x-forwarded-host']) && (tmp=tmp.trim().split(/[,\s]+/)) ? tmp[0] : null, // split forwarded host so "m.o2online.de, proxy1:80808 prx2" -> returns m.o2online.de
-		external_url  = protocol && host && (tmp=headers['x-o2-forwarded-request']) ? protocol+'://'+ host + tmp : null,
+		host          = (tmp=headers['x-forwarded-host']) && (tmp=tmp.trim().split(/[,\s]+/)) ? tmp[0] : null, // split forwarded host so "m.x-x.io, proxy1:80808 prx2" -> returns m.x-x.io
+		external_url  = protocol && host && (tmp=headers['x-x-forwarded-request']) ? protocol+'://'+ host + tmp : null,
 		external      = external_url ? url.parse(external_url) : null, // url as seen by the client
 		
 		server_url    = protocol && (host=(headers.host||(server_config.hostname+(server_config.port?':'+server_config.port:'')))) ? (protocol + '://' + host ): null,
 		server        = server_url ? url.parse(server_url) : null, // current server config but as seen from outside (host header etc.)
 		
 		target_url    = target_config ? target_config.url : null, // use the url config of the proxy target
-		target        = target_url ? url.parse(target_url) : null;// backend config url, p.e. cms www.o2online.de/mobile_portal
+		target        = target_url ? url.parse(target_url) : null;// backend config url, p.e. cms www.x-x.io/mobile-portal
 		
 	mount = mount ? ('/'+mount).replace(/[\/]{2,}/g,'/') : null; // begin with / and replace sequences of / with a single /
 		
@@ -115,13 +115,13 @@ module.exports=extend(M=function(req,target_config,mount){
 	return {
 		/*!
 		 * test if a an url is internal for that proxy target or is an external url . p.e. a jump out of the proxy target scope
-		 * example: for a target config like http://www.o2online/mobile_portal
-		 * the url http://www.o2online/home is external (as the path prefix is different)
-		 * the url https://www.o2online/mobile_portal/tarife/shop  is not external, just a switch to http. note http is prefix of https.
+		 * example: for a target config like http://www.x-x/mobile-portal
+		 * the url http://www.x-x/home is external (as the path prefix is different)
+		 * the url https://www.x-x/mobile-portal/tarife/shop  is not external, just a switch to http. note http is prefix of https.
 		 *
 		 * to be in the same scope server and port must be equal (default port numbers for http/https are respected)
 		 * url protocol mus have proxy target protocol as prefix p.e. http
-		 * url path must have proxy target path as prefix  p.e. /mobile_portal
+		 * url path must have proxy target path as prefix  p.e. /mobile-portal
 		 *
 		 * we return null for non intenral urls
 		 * and an object for internal urls, where a property ssl indicates if its internal but a switch to or from ssl
@@ -134,7 +134,7 @@ module.exports=extend(M=function(req,target_config,mount){
 			if( !prefix ) return {secure_switch:false};
 			
 			if( typeof u      === 'string' ) u      = url.parse(u     );   // came back from proxy target p.e. cms
-			if( typeof prefix === 'string' ) prefix = url.parse(prefix);   // backend config url, p.e. cms www.o2online.de/mobile_portal
+			if( typeof prefix === 'string' ) prefix = url.parse(prefix);   // backend config url, p.e. cms www.x-x.io/mobile-portal
 			
 			if( protocol ) prefix = extend({},prefix,{protocol:protocol+':'}); // we assume https for backend if server is called with x-isssl:true for this test
 			
@@ -173,8 +173,8 @@ module.exports=extend(M=function(req,target_config,mount){
 		/*!
 		 * map a proxy server url to an url as expected by the proxy target
 		 * example:
-		 * mount is '/mountpath/x' and target is http://www.o2online.de/mobile_portal
-		 * then map current url '/mountpath/x/abc?x=1&y=2' to proxy target url /mobile_portal/abc?x=1&y=2
+		 * mount is '/mountpath/x' and target is http://www.x-x.io/mobile-portal
+		 * then map current url '/mountpath/x/abc?x=1&y=2' to proxy target url /mobile-portal/abc?x=1&y=2
 		 */
 		url:function( u, with_http_server_port, with_assumed_external_protocol ){
 			
@@ -217,8 +217,8 @@ module.exports=extend(M=function(req,target_config,mount){
 		/*!
 		 * map a proxy target url to an url as expected by the proxy server
 		 * example:
-		 * mount is '/mountpath/x' and target is http://www.o2online.de/mobile_portal
-		 * map proxy target url  https://www.o2online.de/mobile_portal/foo/bar;session=XYZ?f=1&b=2
+		 * mount is '/mountpath/x' and target is http://www.x-x.io/mobile-portal
+		 * map proxy target url  https://www.x-x.io/mobile-portal/foo/bar;session=XYZ?f=1&b=2
 		 * to proxy server url   https://servername:serverport/mountpath/x/foo/bar;session=ABC?f=1&b=2
 		 * where ABC is the external session id
 		 */
@@ -327,22 +327,22 @@ module.exports=extend(M=function(req,target_config,mount){
 			 */
 			externalize: function( current_url, u ){
 				// if a link is used to switch to a secure protocol or from a secure to an insecure one thus internal.secure_switch is true:
-				// example: https://www.o2online.de/mobile_portal/foo , we can not use a relative link, and we can not use the server seettings if we are behind a proxy
+				// example: https://www.x-x.io/mobile-portal/foo , we can not use a relative link, and we can not use the server seettings if we are behind a proxy
 				// in this case we need the forwarded external url to create a valid *absolute* link in *terms of the final client*
 				// example
-				// external_url http://m.o2online/blablubber/ping/bla/?x=1&x=2
-				// current_url  http://www.o2online/mobile_portal/bla/?x=1&x=2
+				// external_url http://m.x-x/blablubber/ping/bla/?x=1&x=2
+				// current_url  http://www.x-x/mobile-portal/bla/?x=1&x=2
 				// common postfix = /bla/?x=1&x=2
-				// thus prefix of current to remove = http://www.o2online/mobile_portal
-				// and the prefix we nee to add https://m.o2online/blablubber/ping , note https: not http because of switch
-				// thus if u    https://www.o2online/mobile_portal/foo/bar?z=3
-				// we get  https: + //m.o2online/blablubber/ping + /foo/bar?z=3
+				// thus prefix of current to remove = http://www.x-x/mobile-portal
+				// and the prefix we nee to add https://m.x-x/blablubber/ping , note https: not http because of switch
+				// thus if u    https://www.x-x/mobile-portal/foo/bar?z=3
+				// we get  https: + //m.x-x/blablubber/ping + /foo/bar?z=3
 				
 				// we need to handle te session extra: example wit session id's
-				// http://m.o2online/blablubber/ping/bla;SESSION=S1?x=1&x=2   - - > external session = "SESSION=S1"
-				// http://www.o2online/mobile_portal/bla;SESSESION=S2?x=1&x=2 - - > current session  = "SESSION=S2"
+				// http://m.x-x/blablubber/ping/bla;SESSION=S1?x=1&x=2   - - > external session = "SESSION=S1"
+				// http://www.x-x/mobile-portal/bla;SESSION=S2?x=1&x=2 - - > current session = "SESSION=S2"
 				// u can have a session too - - > we give priority for now for this session.
-				// so the proxy target finally defines the session, 
+				// so the proxy target finally defines the session,
 				// because it could return a for example new id on session timeout/invalidation
 				
 				//debugger;

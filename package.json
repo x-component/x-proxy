@@ -2,12 +2,10 @@
   "name": "x-proxy",
   "description": "helpers to perfrom url rewriting and reverse rewriting for a proxy target",
   "version": "1.0.0",
-  "license": {
-    "type": "MIT"
-  },
+  "license": "MIT",
   "dependencies": {
     "x-common": "1.x.x",
-    "x-log": "1.x.x"
+    "x-log"   : "1.x.x"
   },
   "repository": {
     "type": "git",
@@ -15,7 +13,7 @@
   },
   "devDependencies": {
     "x-publish": "1.x.x",
-    "x-test": "1.x.x"
+    "x-test"   : "1.x.x"
   },
   "main": "proxy.js",
   "keywords": [
